@@ -1,0 +1,26 @@
+﻿<Page x:Class="AudioSteganographyProject.UI.Views.HideSongPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:uc="clr-namespace:AudioSteganographyProject.UI.Controls"
+        xmlns:local="clr-namespace:AudioSteganographyProject"
+        mc:Ignorable="d"
+        Title="FileSelectionWindow" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70" />
+            <RowDefinition Height="70" />
+            <RowDefinition Height="70" />
+        </Grid.RowDefinitions>
+        
+        <uc:FileSelectionControl x:Name="SongFile" Title="Select a file to hide." FilePathString="Enter a path to a file" Grid.Row="0" />
+        <uc:FileSelectionControl x:Name="HiddenFile" Title="Select a song to hide in." FilePathString="Enter a path to a file" Grid.Row="1" />
+        <uc:FileSelectionControl x:Name="NewFilePath" Title="Select a location to create the new song file." FilePathString="Enter a path to create the file." Grid.Row="2" />
+        <Button x:Name="CreateButton" Click="onCreateButton_Click" Width="40" Height="30"  Grid.Row="2" Margin="640,186,100,-145" >
+            <Viewbox StretchDirection="DownOnly" Stretch="Uniform">
+                <TextBlock HorizontalAlignment="Center">Create</TextBlock>
+            </Viewbox>
+        </Button>
+    </Grid>
+</Page>
