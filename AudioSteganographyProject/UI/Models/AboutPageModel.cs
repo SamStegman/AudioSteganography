@@ -13,7 +13,7 @@ namespace AudioSteganographyProject.UI.Models
             /* Model not yet needed, created to conform to UI design */
         }
 
-        override public void updateModel()
+        override public void updateModel(object pageContent)
         {
             return;
         }

@@ -51,7 +51,7 @@ namespace AudioSteganographyProject.UI.Views
 
         public void setCurrentPage(PageKeys page)
         {
-            mainModel.updateModel();
+            mainModel.updateModel(mainModel.getCurrentPage());
             mainModel.setCurrentPage(page);
             MainDisplayFrame.Content = mainModel.getCurrentPage();
         }
