@@ -25,7 +25,7 @@ namespace AudioSteganographyProject.Properties
             {
                 // Byte 24 is the first of the four sample rate bytes
                 UInt32 sampleRate = BitConverter.ToUInt32(formatData, 24);
-                // Byte 32 is the first of the two bytes for sample size
+                // Byte 32 is the first fo the two bytes for sample size
                 UInt16 sampleSize = BitConverter.ToUInt16(formatData, 32);
 
                 string hiddenExtension = Path.GetExtension(fileToHidePath);
@@ -57,7 +57,7 @@ namespace AudioSteganographyProject.Properties
 
 
                                 int i = 0;
-                                int iterationsToWait = 220; // 220 iterations is used here because it means that 5% of song data will be changed, as modern sample rates are 88200 samples per second.
+                                int iterationsToWait = 220; // 220 iterations is used here because it means that 5% of song data will be changed, as modern sample rates are 88200.
                                 while (songData.CanRead)
                                 {
                                     originalData = new byte[sampleSize * 20];
