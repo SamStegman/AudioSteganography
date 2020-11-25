@@ -73,9 +73,10 @@ namespace AudioSteganographyProject.UI.Views
                         using (FileStream originalSongStream = File.Open(@songPath, FileMode.Open, FileAccess.Read))
                         {
                             //using (BinaryReader binReader_HideFile = new BinaryReader(hiddenFileStream))
-                            using (FileStream hiddenFileStream = File.Open(@fileToHidePath, FileMode.Open, FileAccess.Read))                            
+                            using (FileStream hiddenFileStream = File.Open(@fileToHidePath, FileMode.Open, FileAccess.Read))
                             {
-                                Dictionary<String, byte[]> formatData = await GetFormatData(originalSongStream);
+                                Dictionary<String, byte[]> formatData = new Dictionary<string, byte[]>();
+                                Dictionary<String, int> info = GetFormatData(originalSongStream, out formatData);
                                 //byte[] formatData = getFormatData(binReader_Song);
 
                                 if (formatData["head"].Length >= 8)
@@ -94,7 +95,7 @@ namespace AudioSteganographyProject.UI.Views
                                         {
                                             //await destinationStream.WriteAsync(formatData, 0, formatData.Length);
                                             destinationStream.Close();
-                                            editData(formatData hiddenFileStream);
+                                            formatData = editData(formatData, hiddenFileStream, info);
                                             await SimpleDataCopyTest(formatData["head"], formatData["data"], newFilePath);
                                             //await HideFileDataLSB(formatData, originalSongStream, hiddenFileStream, destinationStream);
                                             //await HideFileDataAsync(formatData, originalSongStream, hiddenFileStream, destinationStream);
@@ -106,9 +107,9 @@ namespace AudioSteganographyProject.UI.Views
                                     }
                                 }
                             }
-                        }                            
+                        }
                     }
-                                      
+
                     MessageBox.Show("The new .wav file has been created.", "Stegangraphy Project", MessageBoxButton.OK);
                     //Thread thread = new Thread(new ThreadStart(WAVReader.HideFile(songPath, fileToHidePath, dirPath)));
                 }
@@ -122,17 +123,63 @@ namespace AudioSteganographyProject.UI.Views
                 MessageBox.Show("Not all paths exist. Make sure that all paths exist and your song is a .wav file.", "Stegangraphy Project", MessageBoxButton.OK);
             }
         }
-
-        private void editData(Dictionary<string, byte[]> formatData, FileStream hiddenFileStream)
+        private static byte[] ReadAllBytes(BinaryReader reader)
         {
-            throw new NotImplementedException();
+            const int bufferSize = 4096;
+            using (var ms = new MemoryStream())
+            {
+                byte[] buffer = new byte[bufferSize];
+                int count;
+                while ((count = reader.Read(buffer, 0, buffer.Length)) != 0)
+                    ms.Write(buffer, 0, count);
+                return ms.ToArray();
+            }
+
+        }
+        public static byte Set(byte aByte, int pos, bool value)
+        {
+            if (value)
+            {
+                //left-shift 1, then bitwise OR
+                aByte = (byte)(aByte | (1 << pos));
+            }
+            else
+            {
+                //left-shift 1, then take complement, then bitwise AND
+                aByte = (byte)(aByte & ~(1 << pos));
+            }
+            return aByte;
+        }
+
+        private Dictionary<string, byte[]> editData(Dictionary<string, byte[]> formatData, FileStream hiddenFileStream, Dictionary<String, int> info)
+        {
+            int bytestoskip = info["bitDepth"] / 8;
+            BinaryReader reader = new BinaryReader(hiddenFileStream);
+            byte[] data = formatData["data"];
+
+            byte[] allData = ReadAllBytes(reader);
+            int bytenum = 0;
+            foreach (byte item in allData)
+            {
+                BitArray bits = new BitArray(new byte[] { item });
+                for (int i = bits.Length -1 ; i >=0; i -=1 )
+                {
+                    data[bytenum] = Set(data[bytenum], 0, bits[i]);
+                    byte asdf = Set(data[bytenum], 0, true);
+                    byte ffff = Set(data[bytenum], 0, false);
+                    bytenum += bytestoskip;
+                }
+
+            }
+            formatData["data"] = data;
+            return formatData;
         }
 
         public async Task SimpleDataCopyTest(byte[] formatData, byte[] data, String file)
         {
             //binWriter.Write(formatData);
             using (BinaryWriter writer = new BinaryWriter(File.Open(file, FileMode.Append)))
-            {      
+            {
                 writer.Write(formatData);
                 writer.Write(data);
             }
@@ -145,7 +192,7 @@ namespace AudioSteganographyProject.UI.Views
             byte[] firstRead = new byte[4];
             byte[] formatDataArray = null;
 
-            
+
             firstRead = originalSong.ReadBytes(firstRead.Length);
             if (Enumerable.SequenceEqual(RIFF_BYTES, firstRead))
             {
@@ -183,8 +230,8 @@ namespace AudioSteganographyProject.UI.Views
 
         public int readbytes(List<byte> b, int num, BinaryReader r)
         {
-            byte[] hold = new byte[num]; 
-            for(int i = 0; i < num; i++)
+            byte[] hold = new byte[num];
+            for (int i = 0; i < num; i++)
             {
                 byte temp = r.ReadByte();
                 b.Add(temp);
@@ -201,27 +248,30 @@ namespace AudioSteganographyProject.UI.Views
 
         }
 
-        public async Task<Dictionary<String, byte[]>> GetFormatData(FileStream originalSong)
+        public Dictionary<String, int> GetFormatData(FileStream originalSong, out Dictionary<string, byte[]> raw)
         {
+            raw = new Dictionary<string, byte[]>();
             BinaryReader reader = new BinaryReader(originalSong);
+            Dictionary<String, int> ans = new Dictionary<String, int>();
             List<byte> head = new List<byte>();
             // chunk 
-            int chunkID       = readbytes(head, 4, reader);
-            int fileSize      = readbytes(head, 4, reader);
-            int riffType      = readbytes(head, 4, reader);
+            int chunkID = readbytes(head, 4, reader);
+            int fileSize = readbytes(head, 4, reader);
+            int riffType = readbytes(head, 4, reader);
 
 
             // chunk 1
-            int fmtID         = readbytes(head, 4, reader);
-            int fmtSize       = readbytes(head, 4, reader); // bytes for this chunk (expect 16 or 18)
+            int fmtID = readbytes(head, 4, reader);
+            int fmtSize = readbytes(head, 4, reader); // bytes for this chunk (expect 16 or 18)
 
             // 16 bytes coming...
-            int fmtCode       = readbytes(head, 2, reader);
-            int channels      = readbytes(head, 2, reader);
-            int sampleRate    = readbytes(head, 4, reader);
-            int byteRate      = readbytes(head, 4, reader);
+            int fmtCode = readbytes(head, 2, reader);
+            int channels = readbytes(head, 2, reader);
+            int sampleRate = readbytes(head, 4, reader);
+            int byteRate = readbytes(head, 4, reader);
             int fmtBlockAlign = readbytes(head, 2, reader);
-            int bitDepth      = readbytes(head, 2, reader);
+            int bitDepth = readbytes(head, 2, reader);
+            ans.Add("bitDepth", bitDepth);
 
             if (fmtSize == 18)
             {
@@ -237,12 +287,12 @@ namespace AudioSteganographyProject.UI.Views
             // DATA!
             byte[] data = reader.ReadBytes(bytes);
 
-            Dictionary<String, byte[]> ans = new Dictionary<String, byte[]>();
-            ans.Add("head", head.ToArray());
-            ans.Add("data", data);
+
+            raw.Add("head", head.ToArray());
+            raw.Add("data", data);
 
             return ans;
-          
+
         }
 
         public async Task HideFileDataLSB(byte[] formatData, FileStream originalSong, FileStream fileDataToHide, FileStream destinationFile)
@@ -266,7 +316,7 @@ namespace AudioSteganographyProject.UI.Views
                     {
                         // The choice to read two bytes here and then divide the buffer into individual bytes was done to ensure that the destination file will end on an even sample boundry.
                         // Additionally, this approach means that the position of the LSBs will be static due to the behavior of BitArrays representing 1 byte.
-                        
+
                         //sampleDataBuffer = originalSong.ReadBytes(sampleDataBuffer.Length));
                         readLength_SampleData = await originalSong.ReadAsync(sampleDataBuffer, 0, sampleDataBuffer.Length);
                         byte[] sampleByteArray1 = new byte[1];
@@ -332,7 +382,7 @@ namespace AudioSteganographyProject.UI.Views
                 byte[] sampleDataBuffer = new byte[1000];
                 byte[] fileDataBuffer = new byte[10];
                 int readLength_SampleData = -1;
-                int readLength_HiddenFile = -1;             
+                int readLength_HiddenFile = -1;
 
                 /*
                  * Start reading sample data and data from the file to be hidden into buffers.
