@@ -1,15 +1,14 @@
-﻿using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
-using System.Linq;
-using AudioSteganographyProject.Interfaces;
-using AudioSteganographyProject.Properties;
+﻿using AudioSteganographyProject.Interfaces;
 using AudioSteganographyProject.UI.Models;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace AudioSteganographyProject.UI.Views
 {
@@ -97,6 +96,10 @@ namespace AudioSteganographyProject.UI.Views
                                             await SimpleDataCopyTest(formatData, originalSongStream, destinationStream);
                                             //await HideFileDataLSB(formatData, originalSongStream, hiddenFileStream, destinationStream);
                                             //await HideFileDataAsync(formatData, originalSongStream, hiddenFileStream, destinationStream);
+                                            for (int i = 0; i < formatData.Length; i++)
+                                            {
+                                                Console.WriteLine(i + " " + formatData[i] + " " + Encoding.ASCII.GetString(formatData, i, 1));
+                                            }
                                         }
                                     }
                                 }
@@ -126,25 +129,10 @@ namespace AudioSteganographyProject.UI.Views
             while (remainingReadLength != 0)
             {
                 byte[] remainingDataBuffer = new byte[256];
-                //remainingDataBuffer = originalSong.ReadBytes(remainingDataBuffer.Length);
-
                 remainingReadLength = await originalSong.ReadAsync(remainingDataBuffer, 0, remainingDataBuffer.Length);
-                sbyte[] signedByteArray = new sbyte[remainingDataBuffer.Length];
-                signedByteArray = Array.ConvertAll(remainingDataBuffer, b => (sbyte)b);
-
-
-                //remainingDataBuffer = originalSongReader.ReadBytes(remainingDataBuffer.Length);
-                //binWriter.Write(remainingDataBuffer);
-                byte[] sampleArray = signedByteArray.SelectMany(s => BitConverter.GetBytes((short)s)).ToArray();
-                await destinationFile.WriteAsync(sampleArray, 0, sampleArray.Length);
-
-                
-                /*
-                for (int i = 0; i < formatData.Length; i++)
-                {
-                    Console.WriteLine(BitConverter.ToString(remainingDataBuffer, i, 1) + " " + Encoding.ASCII.GetString(remainingDataBuffer, i, 1));
-                }
-                */
+                //sbyte[] signedByteArray = new sbyte[remainingDataBuffer.Length];
+                //signedByteArray = Array.ConvertAll(remainingDataBuffer, b => (sbyte)b);
+                await destinationFile.WriteAsync(remainingDataBuffer.SelectMany(s => BitConverter.GetBytes((short)s)).ToArray(), 0, remainingReadLength);
             }
         }
 
