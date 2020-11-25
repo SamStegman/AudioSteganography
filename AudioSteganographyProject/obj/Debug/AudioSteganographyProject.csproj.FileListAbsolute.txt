@@ -22,3 +22,26 @@ S:\SoftwareProjects\AudioSteganography_Framework\AudioSteganographyProject\obj\D
 S:\SoftwareProjects\AudioSteganography_Framework\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.csprojAssemblyReference.cache
 S:\SoftwareProjects\AudioSteganography_Framework\AudioSteganographyProject\obj\Debug\UI\Views\ReadHiddenInfoPage.g.cs
 S:\SoftwareProjects\AudioSteganography_Framework\AudioSteganographyProject\obj\Debug\UI\Views\ReadHiddenInfoPage.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\bin\Debug\AudioSteganographyProject.exe.config
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\bin\Debug\AudioSteganographyProject.exe
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\bin\Debug\AudioSteganographyProject.pdb
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.csprojAssemblyReference.cache
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\AboutPage.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Controls\FileSelectionControl.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\HideSongPage.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\MainWindow.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\ReadHiddenInfoPage.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\App.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject_MarkupCompile.cache
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject_MarkupCompile.lref
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\AboutPage.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Controls\FileSelectionControl.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\HideSongPage.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\MainWindow.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\UI\Views\ReadHiddenInfoPage.baml
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.g.resources
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.Properties.Resources.resources
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.csproj.GenerateResource.cache
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.exe
+D:\Code\Visual Studio c#\AudioSteganographyProject\AudioSteganographyProject\obj\Debug\AudioSteganographyProject.pdb

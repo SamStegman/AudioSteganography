@@ -75,16 +75,16 @@ namespace AudioSteganographyProject.UI.Views
                             //using (BinaryReader binReader_HideFile = new BinaryReader(hiddenFileStream))
                             using (FileStream hiddenFileStream = File.Open(@fileToHidePath, FileMode.Open, FileAccess.Read))                            
                             {
-                                byte[] formatData = await GetFormatData(originalSongStream);
+                                Dictionary<String, byte[]> formatData = await GetFormatData(originalSongStream);
                                 //byte[] formatData = getFormatData(binReader_Song);
 
-                                if (formatData.Length >= 8)
+                                if (formatData["head"].Length >= 8)
                                 {
                                     byte[] dataByteCheck = new byte[4];
-                                    Array.Copy(formatData, formatData.Length - 8, dataByteCheck, 0, 4);
+                                    Array.Copy(formatData["head"], formatData["head"].Length - 8, dataByteCheck, 0, 4);
                                     if (Enumerable.SequenceEqual(DATA_BYTES, dataByteCheck))
                                     {
-                                        uint dataSubchunkBits = BitConverter.ToUInt32(formatData, formatData.Length - 8);
+                                        uint dataSubchunkBits = BitConverter.ToUInt32(formatData["head"], formatData["head"].Length - 8);
                                         FileInfo fileInfo = new FileInfo(fileToHidePath);
 
                                         // fileInfo.Length will always be positive and dataSubchunkBits will simply be expanded so no precision will be lost here.
@@ -93,12 +93,14 @@ namespace AudioSteganographyProject.UI.Views
                                         if (Convert.ToUInt64(dataSubchunkBits) / 16 > Convert.ToUInt64(fileInfo.Length) + 8)
                                         {
                                             //await destinationStream.WriteAsync(formatData, 0, formatData.Length);
-                                            await SimpleDataCopyTest(formatData, originalSongStream, destinationStream);
+                                            destinationStream.Close();
+                                            editData(formatData hiddenFileStream);
+                                            await SimpleDataCopyTest(formatData["head"], formatData["data"], newFilePath);
                                             //await HideFileDataLSB(formatData, originalSongStream, hiddenFileStream, destinationStream);
                                             //await HideFileDataAsync(formatData, originalSongStream, hiddenFileStream, destinationStream);
-                                            for (int i = 0; i < formatData.Length; i++)
+                                            for (int i = 0; i < formatData["head"].Length; i++)
                                             {
-                                                Console.WriteLine(i + " " + formatData[i] + " " + Encoding.ASCII.GetString(formatData, i, 1));
+                                                Console.WriteLine(i + " " + formatData["head"][i] + " " + Encoding.ASCII.GetString(formatData["head"], i, 1));
                                             }
                                         }
                                     }
@@ -121,18 +123,18 @@ namespace AudioSteganographyProject.UI.Views
             }
         }
 
-        public async Task SimpleDataCopyTest(byte[] formatData, FileStream originalSong, FileStream destinationFile)
+        private void editData(Dictionary<string, byte[]> formatData, FileStream hiddenFileStream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task SimpleDataCopyTest(byte[] formatData, byte[] data, String file)
         {
             //binWriter.Write(formatData);
-            await destinationFile.WriteAsync(formatData, 0, formatData.Length);
-            int remainingReadLength = -1;
-            while (remainingReadLength != 0)
-            {
-                byte[] remainingDataBuffer = new byte[256];
-                remainingReadLength = await originalSong.ReadAsync(remainingDataBuffer, 0, remainingDataBuffer.Length);
-                //sbyte[] signedByteArray = new sbyte[remainingDataBuffer.Length];
-                //signedByteArray = Array.ConvertAll(remainingDataBuffer, b => (sbyte)b);
-                await destinationFile.WriteAsync(remainingDataBuffer.SelectMany(s => BitConverter.GetBytes((short)s)).ToArray(), 0, remainingReadLength);
+            using (BinaryWriter writer = new BinaryWriter(File.Open(file, FileMode.Append)))
+            {      
+                writer.Write(formatData);
+                writer.Write(data);
             }
         }
 
@@ -179,46 +181,68 @@ namespace AudioSteganographyProject.UI.Views
             return formatDataArray;
         }
 
-        public async Task<byte[]> GetFormatData(FileStream originalSong)
+        public int readbytes(List<byte> b, int num, BinaryReader r)
         {
-            List<byte> byteList = new List<byte>();
-            Queue<byte> readQueue = new Queue<byte>();
-            byte[] firstRead = new byte[4];
-            byte[] formatDataArray = null;
-
-            await originalSong.ReadAsync(firstRead, 0, firstRead.Length);
-            if (Enumerable.SequenceEqual(RIFF_BYTES, firstRead))
+            byte[] hold = new byte[num]; 
+            for(int i = 0; i < num; i++)
             {
-                byte[] nextFormatByte = new byte[1];
-                int readLength = -1;
-
-                for (int i = 0; i < firstRead.Length; i++)
-                {
-                    readQueue.Enqueue(firstRead[i]);
-                }
-                
-                readLength = await originalSong.ReadAsync(nextFormatByte, 0, nextFormatByte.Length);
-                while (readLength != 0 && !Enumerable.SequenceEqual(DATA_BYTES, readQueue.ToArray()))
-                {
-                    byteList.Add(readQueue.Dequeue());
-                    readQueue.Enqueue(nextFormatByte[0]);
-                    readLength = await originalSong.ReadAsync(nextFormatByte, 0, nextFormatByte.Length);
-                }
-
-                while (readQueue.Count > 0)
-                {
-                    byteList.Add(readQueue.Dequeue());
-                }
-
-                byte[] dataChunkSizeBytes = new byte[4];
-                await originalSong.ReadAsync(dataChunkSizeBytes, 0, dataChunkSizeBytes.Length);
-                for (int i = 0; i < dataChunkSizeBytes.Length; i++)
-                {
-                    byteList.Add(dataChunkSizeBytes[i]);
-                }
-                formatDataArray = byteList.ToArray();
+                byte temp = r.ReadByte();
+                b.Add(temp);
+                hold[i] = temp;
             }
-            return formatDataArray;
+            if (num == 4)
+            {
+                return BitConverter.ToInt32(hold, 0);
+            }
+            else
+            {
+                return BitConverter.ToInt16(hold, 0);
+            }
+
+        }
+
+        public async Task<Dictionary<String, byte[]>> GetFormatData(FileStream originalSong)
+        {
+            BinaryReader reader = new BinaryReader(originalSong);
+            List<byte> head = new List<byte>();
+            // chunk 
+            int chunkID       = readbytes(head, 4, reader);
+            int fileSize      = readbytes(head, 4, reader);
+            int riffType      = readbytes(head, 4, reader);
+
+
+            // chunk 1
+            int fmtID         = readbytes(head, 4, reader);
+            int fmtSize       = readbytes(head, 4, reader); // bytes for this chunk (expect 16 or 18)
+
+            // 16 bytes coming...
+            int fmtCode       = readbytes(head, 2, reader);
+            int channels      = readbytes(head, 2, reader);
+            int sampleRate    = readbytes(head, 4, reader);
+            int byteRate      = readbytes(head, 4, reader);
+            int fmtBlockAlign = readbytes(head, 2, reader);
+            int bitDepth      = readbytes(head, 2, reader);
+
+            if (fmtSize == 18)
+            {
+                // Read any extra values
+                int fmtExtraSize = readbytes(head, 2, reader);
+                reader.ReadBytes(fmtExtraSize);
+            }
+
+            // chunk 2
+            int dataID = readbytes(head, 4, reader);
+            int bytes = readbytes(head, 4, reader);
+
+            // DATA!
+            byte[] data = reader.ReadBytes(bytes);
+
+            Dictionary<String, byte[]> ans = new Dictionary<String, byte[]>();
+            ans.Add("head", head.ToArray());
+            ans.Add("data", data);
+
+            return ans;
+          
         }
 
         public async Task HideFileDataLSB(byte[] formatData, FileStream originalSong, FileStream fileDataToHide, FileStream destinationFile)
