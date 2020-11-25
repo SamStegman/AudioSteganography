@@ -14,8 +14,8 @@
             <RowDefinition Height="70" />
         </Grid.RowDefinitions>
         
-        <uc:FileSelectionControl x:Name="SongFile" Title="Select a file to hide." FilePathString="Enter a path to a file" Grid.Row="0" />
-        <uc:FileSelectionControl x:Name="HiddenFile" Title="Select a song to hide in." FilePathString="Enter a path to a file" Grid.Row="1" />
+        <uc:FileSelectionControl x:Name="SongFile" Title="Select a song to hide in." FilePathString="Enter a path to a file" Grid.Row="0" />
+        <uc:FileSelectionControl x:Name="HiddenFile" Title="Select a file to hide." FilePathString="Enter a path to a file" Grid.Row="1" />
         <uc:FileSelectionControl x:Name="NewFilePath" Title="Select a location to create the new song file." FilePathString="Enter a path to create the file." Grid.Row="2" />
         <Button x:Name="CreateButton" Click="onCreateButton_Click" Width="40" Height="30"  Grid.Row="2" Margin="640,186,100,-145" >
             <Viewbox StretchDirection="DownOnly" Stretch="Uniform">
